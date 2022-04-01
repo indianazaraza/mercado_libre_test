@@ -20,8 +20,7 @@ public class BaseTest {
         System.setProperty("webdriver.chrome.driver", "/home/maca/chromedriver");
         driver = new ChromeDriver(getChromeOptions());
         driver.get("https://www.mercadolibre.com.ar/");
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(8));
-
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
     }
 
     /**
