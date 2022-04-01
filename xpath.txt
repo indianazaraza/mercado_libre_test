@@ -1,0 +1,193 @@
+//*[@attr='value'] -> //*[@id='some_text']
+
+- el value siempre va en comillas simples
+- // busca en cualquier parte del html
+- * busca cualquier etiqueta
+- solo sirve cuando hay un attr con un valor único, si hay más toma al primero que encuentre
+
+
+//tag[@attr='value'] -> //p[@class='class1']
+
+- solo va a buscar la etiqueta p con el attr class y el valor class1
+
+
+//tag[boolean condition] -> //p[@id='b' and @name='a']
+                         -> //p[@id='b' and not (@name='a')]
+                         -> //p[@id='b' or @name='a']
+                         -> //p[(@id='b' and @name='a') or @name='a']
+
+- la primera opción busca la etiqueta p que cumpla con el attr id con valor b y el attr name con valor a
+
+
+//tag[text()='get_attr_text'] -> //p[text()='unique id']
+                              -> //p[text()='unique id' and @id='a']  
+
+- text() es una función de xpath, para obtener el texto de un atributo
+- la primera opción, va encontrar en todo el documento la etiqueta p que contenga el texto unique id
+
+
+//tag[@attr='value']/.. -> //span[@id='link']/..          ->  <a href="google.com">
+                                                                <span id=link>google link</span>
+                                                              </a>
+                        -> //span[@id='link']/..
+
+- se empieza buscando la etiqueta hijo para acceder a la etiqueta padre
+- /.. sube un nivel cada vez que se usa esto
+
+
+//tag[@attr='value']//tag[@attr='value'] -> //div[@id='abc']//p[@name='name1']  -> <div id="abc">
+                                                                                     <p name=name1>...</p>
+                                                                                   </div>
+                                         -> //div[@id='abc']//*
+                                         -> //div[@id='abc']/p/a
+
+- se empieza buscando la etiqueta padre para acceder a la etiqueta hijo
+- //* va buscar todo lo que haya dentro de la etiqueta padre o lo primero que encuentre si hay muchos elementos
+- en el tercer caso se accede desde la etiqueta div hasta la a pasando por la etiqueta p, pero se puede mejorar usando //a, es lo mismo 
+- no es buena práctica poner el asterisco, hay que ser específico
+
+
+//tag[@attr='value'][index] -> //p[@name='name1'][1]
+                            -> (//p[@name='name1'])[1]
+
+- si hay dos elementos con los mismos valores en el atributo, solo va a identificar el indicado por el index
+- identifica a la etiqueta hijo de una etiqueta padre
+- el segundo caso, es donde hay etiquetas hijo iguales separadas con etiquetas padre iguales entonces lo "mejor" sería usar esa forma
+- esto solo se utiliza cuando no hay más alternativa, es peligroso
+
+
+//tag[tag[@attr='value']] -> //a[span[@id='link']]
+                          -> //a[.//span[@id='link']]
+
+- se busca un elemento pasándole otro elemento que tiene un atributo único
+- se busca la etiqueta a, la etiqueta padre de span
+- el segundo caso, hace lo mismo, indicando que busca dentro de todas las etiquetas a 
+
+
+//tag[contains(function or @attr, 'value')] -> //p[contains(text(), 'partial_some_text']
+                                            -> //p[contains(@id, '1') and text()='unique id']
+
+- la función contains() busca el elemento que contenga un valor parcial, al contrario de text() que busca un valor exactamente igual
+
+
+//tag[starts-with(function or @attr, 'value')] -> //p[starts-with(@id, 'i')]
+
+- la función starts-with() busca el elemento cuyo valor comience con el texto dado
+
+
+//tag[@attr='value']//tag[position()=index] -> //table[@id='table1']//tr[position()=1]
+                                            -> //table[@id='table1']//tr[position()=1+2]
+
+- la función position(), al pasarle un index, arroja la posición del elemento
+
+
+//tag[@attr='value']//tag[last()] -> //table[@id='table1']//tr[last()]
+                                  -> //table[@id='table1']//tr[last()-2]  
+
+- la función last() arroja la última posición del elemento
+
+
+//tag[count(.//tag)=total] -> //table[count(.//tr)=6]
+                           -> //div[@id='postCommentButtonHolder'][count(.//input)=2]
+
+- la función count() arroja el total de elementos
+- en el primer caso, busca la tabla que tenga un total de 6 filas, aclarando dentro de la función que busque dentro del elemento table todas las etiquetas tr, 
+se debe poner el .
+- en el segundo caso, busca el elemento div, luego busca que tenga 2 elementos input
+
+
+//tag[normalize-space(function or @attr)='get_attr_text'] -> //p[normalize-space(text())='Tommy']
+                                                          -> //p[normalize-space(@id)='a']
+
+- la función ignora los espacios al comienzo y al final del texto, pero si el los tiene dentro no
+
+
+//tag[translate(function or @attr, str1, str2)='get_attr_text'] -> //p[translate(text(), 'TOMMY', 'tommy')='Tommy']
+                                                                -> //p[translate(@id, 'A', 'a')='a']
+
+- la función ignora mayúsculas y minúsculas según el caso, necesita 3 parámetros: 
+    - el primero debe ser el texto a buscar
+    - el segundo debe ser el/los carácter/es que quieren ignorarse
+    - el último el/los carácter/es por los que van a cambiarse 
+- translate ( "abcd", "b", "x") = axcd
+  translate ( "abcd", "bd", "xy") = axcy
+
+
+//tag[normalize-space(translate(function or @attr, str1, str2))='get_attr_text'] -> //p[normalize-space(translate(@id, 'A', 'a'))='a']
+
+- combinando ambas funciones ignora tanto casos sensitivos como espacios
+
+
+//tag[string-length(function or @attr) < number] -> //p[string-length(text()) < 6]
+                                                 -> //p[string-length(@name) > 6]
+
+- la función arroja la longitud de un string
+
+
+//tag[round(function or @attr)= 'number'] -> //p[round(text())='6']
+                                          -> //p[round(@name)='6']
+
+- la función redondea el valor del elemento hacia arriba o hacia abajo, al contrario que la función floor que solo lo hace hacia abajo
+
+
+//tag[substring-after(function or @attr, 'partial_value')= 'value'] -> //p[substring-after(text(), 'some')='_text']
+                                                                    -> //p[substring-before(@name, 'text')='some_']
+
+- la función after devuelve el texto que está después de la subcadena dada
+- la función before devuelve el texto que está antes de la subcadena dada
+
+
+div id A
+div id A
+    L div id B1
+           L div id X1
+           L div id X2
+                 L div id O1
+                       L div id Q1
+                             L div id R1       
+           L div id X3   
+    L div id B2
+          L div id Y1
+          L div id Y2
+                L div id M1
+                      L div id N1
+                      L div id N2    
+                L div id M2
+                      L div id L1  
+          L div id Y3      
+    L div id B3
+          L div id Z1
+          L div id Z2    
+    L div id B4
+
+
+//tag[@attr='value']/parent::tag -> //div[@id='X1']/parent::div
+                                 -> //div[@id='X1']/parent::*
+
+- en el primer caso, se accede al elemento con id B1 a través de su hijo con id X1 usando el axes parent seguido de la etiqueta padre o el *, como hay un solo padre va a tomar esa etiqueta
+
+
+//tag[@attr='value']/ancestor::tag[@attr or function='value'] -> //div[@id='X1']/ancestor::div[@id='A']
+
+- si se pone un * en vez de un elemento después del axes ancestor va a marcar todos los elementos que le anteceden al elemento div con id X1
+- la única diferencia con ancestor-or-self es que se incluye también a X1
+
+
+//tag[@attr='value']/child::tag[@attr or function='value'] -> //div[@id='B2']/child::div[@id='Y1']
+
+- con el axes child se accede al elemento hijo 
+
+
+//tag[@attr='value']/descendant::tag[@attr or function='value'] -> //div[@id='A']/descendant::div[@id='Z1']
+
+- si se pone un * en vez de un elemento después del axes descendant va a marcar todos los elementos que le preceden al elemento div con id A
+
+
+//tag[@attr='value']/following::tag[@attr or function='value'] -> //div[@id='B2']/following::div[@id]
+
+- following marca todos los elementos que vienen después de un elemento, la misma funcionalidad cumple preceding, pero con los elementos que le preceden
+
+
+//tag[@attr='value']/following-sibling::tag[@attr or function='value'] -> //div[@id='B2']/following-sibling::div[@id]
+
+-following-sibling marca todos los elementos que están al mismo nivel y después de un elemento indicado, la misma funcionalidad cumple preceding-sibling, pero solo con los elementos que preceden 
